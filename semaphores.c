@@ -23,7 +23,10 @@
 
 int main()
 {
-    sem_t * mutex;          /* my semaphores */
+    sem_t * EM; /* my semaphores */
+    sem_t * MP;
+    sem_t * DC;
+    sem_t * CP;          /* my semaphores */
     
     int pid;		/* Process id after fork call */
     int i;		/* Loop index. */
@@ -37,6 +40,24 @@ int main()
      
     printf("How many requests to be processed: \n");
     scanf("%d",&N);
+      /* create, initialize semaphore */
+    if ((EM = sem_open("examplesemaphore", O_CREAT, 0644, 1)) == SEM_FAILED) {
+      perror("semaphore initilization");
+      exit(1);
+  }
+  else if ((MP = sem_open("examplesemaphore", O_CREAT, 0644, 1)) == SEM_FAILED) {
+      perror("semaphore initilization");
+      exit(1);
+  }
+  else if ((DC = sem_open("examplesemaphore", O_CREAT, 0644, 1)) == SEM_FAILED) {
+      perror("semaphore initilization");
+      exit(1);
+  }
+  else if ((CP = sem_open("examplesemaphore", O_CREAT, 0644, 1)) == SEM_FAILED) {
+      perror("semaphore initilization");
+      exit(1);
+  }
+ 
 
     for (i=1; i<=N; i++) {
         printf("Who wants in (E=1)(D=2)(C=3)(M=4)(P=5): \n");
@@ -48,7 +69,7 @@ int main()
 	        exit(1);
         }
         
-        
+     
         if (pid == CHILD) {
 	        pid = getpid();
             switch (type) {
@@ -56,51 +77,72 @@ int main()
 		    case 1: /* Elephant code*/
                     printf("     Elephant process with pid %d wants in.\n",pid);
                     fflush(stdout);
+                    sem_wait(EM);
                     printf("     Elephant process with pid %d is in.\n",pid);
                     fflush(stdout);
                     sleep(rand()%10);
                     printf("     Elephant process with pid %d is out.\n",pid);
                     fflush(stdout); 
+                    sem_post(EM);
+                    exit(0);
                     break;
 
 		    case 2:  /*Dog code*/
                     printf("     Dog process with pid %d wants in.\n",pid);
                     fflush(stdout);
+                    sem_wait(DC);
                     printf("     Dog process with pid %d is in.\n",pid);
                     fflush(stdout);
                     sleep(rand()%10);
                     printf("     Dog process with pid %d is out.\n",pid);
                     fflush(stdout);
+                    sem_post(DC);
+                    exit(0);
 		            break;
 
 		    case 3: /*Cat Code*/
                     printf("     Cat process with pid %d wants in.\n",pid);
                     fflush(stdout);
+                    sem_wait(CP);
+                    sem_wait(DC);
                     printf("     Cat process with pid %d is in.\n",pid);
                     fflush(stdout);
                     sleep(rand()%10);
                     printf("     Cat process with pid %d is out.\n",pid);
                     fflush(stdout);
+                    sem_post(CP);
+                    sem_post(DC);
+                    exit(0);
 		            break;
 
 		    case 4: /*Mouse code*/
                     printf("     Mouse process with pid %d wants in.\n",pid);
                     fflush(stdout);
+                    sem_wait(EM);
+                    sem_wait(MP);
                     printf("     Mouse process with pid %d is in.\n",pid);
                     fflush(stdout);
                     sleep(rand()%10);
                     printf("     Mouse process with pid %d is out.\n",pid);
                     fflush(stdout); 
+                    sem_post(EM);
+                    sem_post(MP);
+                    exit(0);
 		            break;
 		
 		    case 5: /*Parrot  Code*/
                     printf("     Parrot process with pid %d wants in.\n",pid);
                     fflush(stdout);
+                    sem_wait(CP);
+                    sem_wait(MP);
                     printf("     Parrot process with pid %d is in.\n",pid);
                     fflush(stdout);
                     sleep(rand()%10);
                     printf("     Parrot process with pid %d is out.\n",pid);
                     fflush(stdout);
+                    sem_wait(CP);
+                    sem_wait(MP);
+                    exit(0);
 		            break;
             }
             exit(0);
@@ -114,5 +156,3 @@ int main()
         fflush(stdout);
     }
 }
-
-
